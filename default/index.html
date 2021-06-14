@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<title>Welcome to th-inx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+}
+
+</style>
+</head>
+<body>
+<h1>Welcome to th-inx!</h1>
+<p>If you see this page, the th-inx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="https://github.com/AzodFR">Thjacque's git</a>.<br/>
+Commercial support is available at
+<a href="https://github.com/thallard">Thallard's git</a>.</p>
+
+<p><em>Thank you for using th-inx.</em></p>
+<form action="test.py" method="GET">
+	<input id="user" type="text" name="user">
+    <input type="submit" style="color: black;margin: 50px; width: 100px; height: 50px; background-color: rgba(0, 204, 255, 1); border: 10px; border-radius: 15%;" id="suPo" value="POST Method" />
+</form>
+
+<form action="upload.php" method="POST" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="fileToUpload" id="fileToUpload">
+    <input type="submit" value="Upload Image">
+  </form>
+
+
+</body>
+ </html>
