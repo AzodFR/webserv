@@ -1,40 +1,117 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<title>Welcome to th-inx!</title>
-<style>
-    body {
-        width: 35em;
-        margin: 0 auto;
-        font-family: Tahoma, Verdana, Arial, sans-serif;
-    }
-}
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<title>Welcome to th-inx!</title>
+	<style>
+		body {
+			width: 35em;
+			margin: 0 auto;
+			font-family: Tahoma, Verdana, Arial, sans-serif;
+		}
 
-</style>
+		div.box {
+			display: flex;
+			align-items: center;
+			justify-content: space-around;
+			margin-top: 3em;
+
+		}
+
+		.meth,
+		.upload {
+			border: 1px solid black;
+			border-radius: 5px;
+			color: black;
+			background-color: rgba(0, 204, 255, 1);
+			padding: 2em;
+		}
+
+		.meth:hover,
+		.upload:hover {
+			background-color: rgb(43, 213, 255);
+		}
+
+		img {
+			margin-left: 8em;
+			margin-top: 5em;
+		}
+
+		.square {
+			height: 50px;
+			width: 500px;
+			cursor: pointer;
+		}
+	</style>
+
+	<script>
+
+		function getCookie(cname) {
+			var name = cname + "=";
+			var decodedCookie = decodeURIComponent(document.cookie);
+			var ca = decodedCookie.split(';');
+			for (var i = 0; i < ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0) == ' ') {
+					c = c.substring(1);
+				}
+				if (c.indexOf(name) == 0) {
+					return c.substring(name.length, c.length);
+				}
+			}
+			return "";
+		}
+
+		if (getCookie("user-color") == "")
+			document.cookie = "user-color=#d34ea5"
+
+	</script>
 </head>
+
 <body>
-<h1>Welcome to th-inx!</h1>
-<p>If you see this page, the th-inx web server is successfully installed and
-working. Further configuration is required.</p>
 
-<p>For online documentation and support please refer to
-<a href="https://github.com/AzodFR">Thjacque's git</a>.<br/>
-Commercial support is available at
-<a href="https://github.com/thallard">Thallard's git</a>.</p>
+	<div id="square" class="square"></div>
+	<h1>Welcome to th-inx!</h1>
+	<p>If you see this page, the th-inx web server is successfully installed and
+		working. Further configuration is required.</p>
 
-<p><em>Thank you for using th-inx.</em></p>
-<form action="test.py" method="GET">
-	<input id="user" type="text" name="user">
-    <input type="submit" style="color: black;margin: 50px; width: 100px; height: 50px; background-color: rgba(0, 204, 255, 1); border: 10px; border-radius: 15%;" id="suPo" value="POST Method" />
-</form>
+	<p>For online documentation and support please refer to
+		<a href="https://github.com/AzodFR">Thjacque's git</a>.<br />
+		Commercial support is available at
+		<a href="https://github.com/thallard">Thallard's git</a>.
+	</p>
 
-<form action="upload.php" method="POST" enctype="multipart/form-data">
-    Select image to upload:
-    <input type="file" name="fileToUpload" id="fileToUpload">
-    <input type="submit" value="Upload Image">
-  </form>
+	<br>
+	<br>
+	<br>
+	<br>
+	<hr>
+	<p><em>Thank you for using th-inx.</em></p>
+	<hr>
+	<div class="box">
+		<a href="get.html" class="meth">GET</a>
 
 
+		<a href="post.html" class="meth">POST</a>
+
+	</div>
+
+	<br>
+	<div class="box">
+		<a href="upload.html" class="upload">Upload</a>
+	</div>
+	<br>
+	<hr>
+
+	<img src="ressources/nyan.gif" />
+
+	<script>
+		document.getElementById("square").style.backgroundColor = getCookie("user-color");
+		document.getElementById("square").addEventListener("click", e => {
+			window.location.href = "cookie.html"
+		})
+	</script>
 </body>
- </html>
+
+</html>

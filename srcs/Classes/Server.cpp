@@ -36,6 +36,7 @@ Server::Server(_t_preServ pre, pthread_mutex_t *logger, map<string, string> mime
 {
 	// Init thread
 	_id = pre.id;
+	_name = pre.name;
 	_logger = logger;
 
 	_port = pre.port;
@@ -58,7 +59,7 @@ Server::Server(_t_preServ pre, pthread_mutex_t *logger, map<string, string> mime
 	_serv_addr.sin_port = htons(pre.port);
 	if (bind(_socket, (struct sockaddr *)&_serv_addr,
 			 sizeof(_serv_addr)))
-		perror("ERROR on binding");
+		error("ERROR on binding");
 
 	listen(_socket, 4096);
 
@@ -66,7 +67,6 @@ Server::Server(_t_preServ pre, pthread_mutex_t *logger, map<string, string> mime
 	_max_sd = _socket;
 	FD_SET(_socket, &_clients_fd);
 
-	_name = pre.name;
 	_error_pages = pre.err;
 	_root = pre._root;
 	_extensions = pre.ext;
@@ -169,41 +169,36 @@ t_find Server::findAllLoc(string path)
 			founded.access += tmp->options.params.find("root")->second;
 		else
 			founded.access += split + "/";
-		cout << "inner: " <<  founded.access<< endl;
 		path.erase(0, pos + 1);
 	}
 	tmp = findInLoc(path, tmp);
 	if (!tmp)
 	{
 		founded.access += path;
-		cout << "found :  " <<founded.access << endl;
+
 		return founded;
 	}
 	founded.path += path;
-	founded.loc = + tmp;
-		if (tmp->options.params.count("root"))
-		{
-			cout << "1" << endl;
-			founded.access += tmp->options.params.find("root")->second;
-		}
-		else
-		{
-			cout << "2" << endl;
-			founded.access += path;
-		}
-cout << "found :  " <<founded.access << endl;
+	founded.loc = +tmp;
+	if (tmp->options.params.count("root"))
+	{
+
+		founded.access += tmp->options.params.find("root")->second;
+	}
+	else
+	{
+
+		founded.access += path;
+	}
+
 	return founded;
 }
-#include <iostream>
-#include <fstream>
-#include <string>
+
 t_file Server::getFile(string path)
 {
 	t_file file = {"", -1};
 	t_find founded = findAllLoc(path);
 	int fd;
-
-	//	std::cout << "founded:  " << founded.path << endl;
 
 	size_t pos = founded.path.size();
 	if (pos == 1)
@@ -212,13 +207,8 @@ t_file Server::getFile(string path)
 	string a_i = path;
 	path.erase(0, pos);
 
-	//std::cout << "path sub: " << path << endl;
-	//std::cout << "root:     " << founded.loc->options.params.find("root")->second << endl;
-
 	path = founded.loc->options.params.find("root")->second + path;
-	//std::cout << "final:    " << path << endl;
 
-	//Rajouter if auto-index
 	if ((fd = open(path.c_str(), O_RDONLY | O_NONBLOCK | O_DIRECTORY)) != -1)
 	{
 		if (!_auto_index)
@@ -308,12 +298,8 @@ t_file Server::getFile(string path)
 		}
 		close(fd);
 	}
-	//std::cout << "2:    " << path << endl;
 	if ((fd = open(path.c_str(), O_RDONLY | O_NONBLOCK)) == -1)
-	{
-		std::cout << "Not Found !" << endl;
 		return file;
-	}
 	struct stat buf;
 	bzero(&buf, sizeof(buf));
 	stat(path.c_str(), &buf);
@@ -335,8 +321,8 @@ t_file Server::getFile(string path)
 		ret += readed;
 		file.content.push_back(c);
 	}
-  	file.size = file.content.size();
-	  close(fd);
+	file.size = file.content.size();
+	close(fd);
 	return file;
 }
 
@@ -351,17 +337,13 @@ void Server::handle_request(Client &client)
 	request += buffer;
 	map<string, string> p_request = request.last();
 	string response, req_type = p_request.find("Request-Type")->second;
-	cout << "Request-Type :[" << req_type << "]" << endl;
-	std::cout << "Request :" << endl
-			  << buffer << endl
-			  << "=====" << endl;
-	cout << "taille de type :" << type->size() << endl;
+
+	// A mettre si debug
+	// cout << buffer << endl;
 	for (size_t i = 0; i <= 4; i++)
 	{
-		cout << req_type << " " << type[i] << endl;
 		if (!strncmp(req_type.c_str(), type[i].c_str(), req_type.size()))
 		{
-			cout << req_type << " " << type[i] << endl;
 			if (check_methods(findAllLoc(p_request.find("Location")->second).loc, req_type, p_request.find("Location")->second))
 				response = (this->*command[i])(p_request, client);
 			else
@@ -374,31 +356,24 @@ void Server::handle_request(Client &client)
 			break;
 		}
 	}
+	// A mettre si debug
+	// cout << response << endl;
 
-	// DEBUG
-	// std::cout << endl
-	// 		  << "La response ici : \n"
-	// 		  << response << endl
-	// 		  << endl;
-
-	cout << "send: " << response.size() << endl;
 	n = 1;
 	while (n > 0)
 	{
-		cout << "normal size: " << response.size() << endl;
+
 		size_t szie = response.size();
-		if(szie > 100000)
+		if (szie > 100000)
 			szie = 100000;
-			cout << "to send: " << szie << endl;
+
 		n = send(client.getSocket(), response.c_str(), szie, 0);
-		
+
 		response.erase(0, n);
 
-		cout << "sended in while: " << n << " new size: " << response.size() << endl;
 		if (!response.size())
 			break;
 	}
-	cout << "sended: " << n << endl;
 	if (n < 0)
 		error("Can't send the response");
 }
@@ -413,7 +388,7 @@ void Server::error(const char *s)
 string Server::POST(map<string, string> header, Client &client)
 {
 	Headers tmp;
-	cout << "test" << endl;
+
 	string
 		resp,
 		content = header.find("Content")->second.c_str();
@@ -433,19 +408,14 @@ string Server::POST(map<string, string> header, Client &client)
 	}
 	if (header.find("Content-Length")->second == "0")
 		return (tmp.return_response_header(STATUS_NO_CONTENT, tmp, 0));
-	if (_extensions.count(extension) && _extensions.find(extension)->second.count("allow_methods"))
-	{
-	}
 	client.setPath(loc);
-	cout << "La location : " << loc << endl;
-	// size_t pos;
-	//if ((pos = loc.rfind(".bla", loc.size() - 4)) != loc.npos)
-		t_find founded = findAllLoc(header.find("Location")->second);
+	t_find founded = findAllLoc(header.find("Location")->second);
 	if (_extensions.count(extension) && _extensions.find(extension)->second.count("cgi_path"))
 	{
 		CGI *cgi = new CGI();
 		string loc_cgi = founded.access;
-		string content_cgi = cgi->getContentFromCGI(header, (char *)(*_extensions.find(extension)->second.find("cgi_path")->second.begin()).c_str(), loc_cgi);resp = tmp.return_response_header(STATUS_OK, tmp, content_cgi.size());
+		string content_cgi = cgi->getContentFromCGI(header, (char *)(*_extensions.find(extension)->second.find("cgi_path")->second.begin()).c_str(), loc_cgi);
+		resp = tmp.return_response_header(STATUS_OK, tmp, content_cgi.size());
 		if (header.find("Location")->second != "/directory/youpi.bla")
 		{
 			resp = tmp.return_response_header(STATUS_OK, tmp, content_cgi.size());
@@ -468,12 +438,11 @@ string Server::POST(map<string, string> header, Client &client)
 	// Check if the content is chunked
 	if (header.count("Transfer-Encoding") && !strncmp(header.find("Transfer-Encoding")->second.c_str(), "chunked", 8))
 	{
-		// readPerChunks(client, "POST", header);
+		readPerChunks(client, "POST", header);
 
 		resp = tmp.return_response_header(STATUS_OK, tmp, 0);
 		return resp;
 	}
-
 
 	t_file file = getFile(header.find("Location")->second);
 	if (header.count("Content") && !header.find("Content")->second.size())
@@ -481,22 +450,30 @@ string Server::POST(map<string, string> header, Client &client)
 
 	// Open the file and print content in
 	ofile.open(founded.access.c_str(), ios::app);
-	cout << "jecris dans " << header.find("Content")->second.size() << endl;
+	int maxSize = -1;
+	if (founded.loc->options.params.count("maxBody"))
+		maxSize = atoi(founded.loc->options.params.find("maxBody")->second.c_str());
 	while (nb_print < atoi(header.find("Content-Length")->second.c_str()))
 	{
-		// cout << "ici : " << nb_print << " / " << atoi(header.find("Content-Length")->second.c_str()) << " \n\n\n";
 		bzero(buffer, 65535);
-
+		if (maxSize >= 0 && static_cast<int>(content.size()) > maxSize)
+		{
+			content = content.substr(0, maxSize);
+			ofile << content;
+			break;
+		}
 		ofile << content;
 		nb_print += content.size();
 		content.clear();
-	// int rec;
+		// int rec;
+
 		recv(client.getSocket(), buffer, 65535, 0);
-		
+
 		// nb_print += rec;
 		content = buffer;
 	}
-
+	cout << content << endl;
+	ofile.close();
 	resp = tmp.return_response_header(200, tmp, 0);
 	return resp;
 }
@@ -508,7 +485,7 @@ string Server::DELETE(map<string, string> header, Client &client)
 	Headers tmp;
 	log("\e[1;93m[DELETE -> " + header.find("Location")->second + "]\e[0m");
 
-	string file = findAllLoc(header.find("Location")->second).path;
+	string file = findAllLoc(header.find("Location")->second).access;
 	remove(file.c_str());
 
 	content = tmp.return_response_header(STATUS_OK, tmp, 0);
@@ -533,7 +510,7 @@ string Server::PUT(map<string, string> header, Client &client)
 		if (*it == '.')
 			break;
 	}
-		t_find founded = findAllLoc(header.find("Location")->second);
+	t_find founded = findAllLoc(header.find("Location")->second);
 	if (_extensions.count(extension) && _extensions.find(extension)->second.count("cgi_path"))
 	{
 
@@ -558,7 +535,7 @@ string Server::PUT(map<string, string> header, Client &client)
 		return resp;
 	}
 	ofile.open(founded.path.c_str(), ios::app);
-	
+
 	if (header.count("Transfer-Enconding") && !strncmp(header.find("Transfer-Encoding")->second.c_str(), "chunked", 8))
 	{
 		readPerChunks(client, "PUT", header);
@@ -576,8 +553,10 @@ string Server::PUT(map<string, string> header, Client &client)
 	if (header.count("Content") && !header.find("Content")->second.size())
 		resp = SEND_ERROR(STATUS_NO_CONTENT, "No Content");
 
-	int nb_prints, fd = open(founded.access.c_str(), O_TRUNC | O_CREAT | O_WRONLY | O_NONBLOCK, 0777);
+	int nb_prints, fd = open(founded.access.c_str(), O_TRUNC | O_CREAT | O_WRONLY | O_NONBLOCK, 0777), maxSize = INT_MAX;
 	size_t remaining_characters = content.size(), count = 0;
+	if (founded.loc->options.params.count("maxBody"))
+		maxSize = atoi(founded.loc->options.params.find("maxBody")->second.c_str());
 	while (count < remaining_characters)
 	{
 		if (65535 < count)
@@ -586,6 +565,11 @@ string Server::PUT(map<string, string> header, Client &client)
 		{
 			to_print = content_char + count;
 			nb_prints = strlen(content_char);
+		}
+		if (maxSize >= 0 && maxSize < nb_prints)
+		{
+			write(fd, to_print, maxSize);
+			break;
 		}
 		count += write(fd, to_print, nb_prints);
 	}
@@ -634,7 +618,7 @@ string Server::GET(map<string, string> header, Client &client)
 		t_find founded = findAllLoc(header.find("Location")->second);
 
 		CGI *cgi = new CGI();
-				string loc_cgi = founded.access;
+		string loc_cgi = founded.access;
 		string content_cgi = cgi->getContentFromCGI(header, (char *)(*_extensions.find(extension)->second.find("cgi_path")->second.begin()).c_str(), loc_cgi);
 		if (header.find("Location")->second != "/directory/youpi.bla")
 		{
@@ -651,9 +635,10 @@ string Server::GET(map<string, string> header, Client &client)
 			resp = resp.substr(0, pos + 2);
 			resp += content_cgi;
 		}
+		delete cgi;
 		return resp;
 	}
-	
+
 	if (file.size == -1)
 		resp = SEND_ERROR(STATUS_NOT_FOUND, "Not Found");
 	else if (header.count("coffee"))
@@ -666,7 +651,7 @@ string Server::GET(map<string, string> header, Client &client)
 			resp = tmp.return_response_header(200, tmp, file.size);
 		resp += file.content;
 	}
-	cout << "file size: " << file.size << endl;
+
 	return resp;
 }
 
@@ -690,7 +675,6 @@ string Server::SEND_ERROR(int status, const char *msg)
 		page = _error_pages.find(status)->second;
 	else
 		page = "default/error.html";
-	cout << page << endl;
 	int fd = open(page.c_str(), O_RDONLY | O_NONBLOCK);
 	while (read(fd, &c, 1))
 		file.content.push_back(c);
@@ -718,7 +702,12 @@ void Server::log(string s)
 
 	info = localtime(&t);
 	strftime(buffer, sizeof(buffer), "[%c]", info);
-	std::cout << "\e[1;" << to_string(93 + _id) << "m[SERVER " << _id << "::" << _port << "]\e[0m" << s << " \e[1;90m" << buffer << "\e[0m" << endl;
+	string name;
+	if (_name != "default_server")
+		name = _name;
+	else
+		name = "SERVER " + to_string(_id);
+	std::cout << "\e[1;" << to_string(93 + _id) << "m[" << name << "::" << _port << "]\e[0m" << s << " \e[1;90m" << buffer << "\e[0m" << endl;
 
 	pthread_mutex_unlock(_logger);
 }
@@ -733,21 +722,13 @@ bool Server::check_methods(t_loc *root, string meth, string loc)
 		if (*it == '.')
 			break;
 	}
-	cout << "extension: |" << extension << "|" << endl;
 	if (_extensions.count(extension) && _extensions.find(extension)->second.count("allow_methods"))
-	{
-		cout << "found custom extension !" << endl;
 		allowed = _extensions.find(extension)->second.find("allow_methods")->second;
-	}
 	else
 		allowed = root->options.methods;
-
 	for (vector<string>::iterator it = allowed.begin(); it != allowed.end(); it++)
-	{
-		cout << "allowed here: " << *it << endl;
 		if (*it == meth)
 			return true;
-	}
 	return false;
 }
 
@@ -791,7 +772,7 @@ string Server::readPerChunks(Client &client, string method, map<string, string> 
 	stringstream stream;
 	stream << hex << length_char;
 	stream >> length;
-	
+
 	if (!length)
 		return content;
 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>Uploading page!</title>
+    <style>
+        body {
+            width: 35em;
+            margin: 0 auto;
+            font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+
+        div.box {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 3em;
+
+        }
+
+        .index {
+            border: 1px solid black;
+            border-radius: 5px;
+            color: black;
+            background-color: rgba(0, 204, 255, 1);
+            padding: 2em;
+        }
+
+        .index:hover {
+            background-color: rgb(43, 213, 255);
+        }
+
+        .square {
+            height: 50px;
+            width: 500px;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        if (getCookie("user-color") == "")
+            document.cookie = "user-color=#d34ea5"
+
+    </script>
+</head>
+
+<body>
+
+    <div id="square" class="square"></div>
+    <h1>Upload on server!</h1>
+
+
+    <form action="upload.php" method="POST" enctype="multipart/form-data">
+        Select file to upload:
+        <input type="file" name="fileToUpload" id="fileToUpload">
+        <input type="submit" value="Upload file">
+    </form>
+
+    <hr>
+
+    <div class="box">
+        <a href="index.html" class="index">Index</a>
+    </div>
+
+    <script>
+        document.getElementById("square").style.backgroundColor = getCookie("user-color");
+        document.getElementById("square").addEventListener("click", e => {
+            window.location.href = "cookie.html"
+        })
+    </script>
+
+</body>
+
+</html>

@@ -21,17 +21,15 @@ void Headers::operator+=(string send)
 	map<string, string> head;
 	string line;
 	string content;
-	int i = 0;
 	while (getline(to_parse, line))
 	{
-		cout << i++ << endl;
+
 		if (line == "\r")
 		{
 
-			while(getline(to_parse, line))
+			while (getline(to_parse, line))
 				content += line + "\n";
 			head.insert(make_pair("Content", content));
-			cout << content.find("\r\n\r\n") << endl;
 			break;
 		}
 		line[line.size() - 1] = '\0';
@@ -43,7 +41,6 @@ void Headers::operator+=(string send)
 			line.erase(0, pos);
 			pos = line.find("HTTP");
 			string loc = line.substr(0, pos - 1);
-			cout << "location: " << loc << endl;
 			if ((pos = loc.find("?")) != string::npos)
 			{
 
@@ -69,8 +66,6 @@ void Headers::operator+=(string send)
 	if (!head.count("Content-Length"))
 		head.insert(make_pair("Content-Length", "0"));
 	_headers.insert(make_pair(_headers.size(), head));
-
-//	exit(1);
 }
 
 int Headers::check(map<string, string> actual)

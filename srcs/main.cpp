@@ -64,67 +64,31 @@ void *main_loop(void *arg)
 						string buff;
 						char buffer[100000];
 						int receive = 0;
-						//int i = 1;
+
 						do
 						{
-							bzero(buffer, 100000);
-							//int len_before_recv = sizeof(buffer);
+							bzero(buffer, 10000);
 							usleep(50);
 							int readed = recv(fd, buffer, 100000, 0);
 							nbytes_read += readed;
-	
-
-							if(!readed)
+							if (!readed)
 							{
 								if (receive >= 10000)
 								{
 									connection_closed = true;
-									cout << "\e[91m CLOSE ICI\e[0m" << endl;
-									break ;
+									break;
 								}
 								else
 								{
 									receive++;
 									continue;
-									}
+								}
 							}
-							//	cout << i++ <<endl;
-							/*if (!buff.size() && receive >= 1000)
-							{
-								connection_closed = true;
-								break ;
-							}
-							else if (!buff.size())
-								++receive;*/
-							// dprintf(1, "debug de la nbytes read = %d\n", nbytes_read);
-							
-							//buff += buffer;
-							for(int i = 0; i  < readed; i++)
-							{
-								//cout << i << endl;
+							for (int i = 0; i < readed; i++)
 								buff.push_back(buffer[i]);
-							}
-
-							// if (60000 - nbytes_read <= 0)
-							// {
-							// // cout << buff << endl;
-							// 	dprintf(1, "je rentre rune fois icic\n");
-							// 	connection_closed = true;
-							// 	cout << "\e[91m CLOSE ICI 2\e[0m" << endl;
-							// 	client.setContent(buff);
-							// 	server->handle_request(client);
-							// 	break;
-							// }
-							
-							// Print log recv()
-							//if (nbytes_read > 0)
-							//	server->log("\e[1;93m[recv() read " + to_string(nbytes_read) + " characters]\e[0;0m");
-							
 							if (nbytes_read < 0)
 							{
-								dprintf(1, "je rentre rune fois icic\n");
 								connection_closed = true;
-								cout << "\e[91m CLOSE ICI 3 " << buff.size() << "\e[0m" << endl;
 								client.setContent(buff);
 								server->handle_request(client);
 								break;
@@ -139,7 +103,7 @@ void *main_loop(void *arg)
 								break;
 							}
 						} while (true);
-						cout << buff <<endl;
+
 						if (connection_closed)
 						{
 							server->log("\e[1;31m[Connection closed]\e[0m");
@@ -196,8 +160,11 @@ int main(int argc, char *argv[])
 		usleep(10);
 		pthread_detach(*thread);
 	}
-	while (1)
-		;
+
+	string line;
+	while (getline(cin, line))
+		if (line == "STOP")
+			exit(0);
 
 	return 0;
 }

@@ -7,10 +7,11 @@ class Server;
 class Worker
 {
 	typedef struct s_file
-{
-	string content;
-	size_t size;
-}				t_file;
+	{
+		string content;
+		size_t size;
+	} t_file;
+
 private:
 	Server *server;
 	pthread_t *thread;
@@ -34,10 +35,7 @@ public:
 	void setStatus(bool);
 	void setSocket(int);
 	void setServer(Server *);
-	void setIt(int oui) { it = oui;}
-
+	void setIt(int oui) { it = oui; }
 };
-
-
 
 #endif

@@ -37,7 +37,7 @@ private:
 	map<string, map<string, vector<string> > > _extensions;
 
 	map<int, string> _error_pages;
-	map<string, string>_mimes;
+	map<string, string> _mimes;
 	map<int, Worker *> _workers;
 	list<Client> _clients;
 
@@ -61,7 +61,6 @@ public:
 	int getPort() { return _port; }
 	int getDescReady() { return _desc_ready; }
 	string getName() { return _name; }
-
 
 	sockaddr_in getServAddr() { return _serv_addr; };
 	sockaddr_in getCliAddr() { return _cli_addr; };

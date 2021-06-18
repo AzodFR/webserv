@@ -1,0 +1,90 @@
+<html>
+
+<head>
+  <title>Cookie</title>
+</head>
+<style>
+  body {
+    width: 35em;
+    margin: 0 auto;
+    font-family: Tahoma, Verdana, Arial, sans-serif;
+  }
+
+  .square {
+    height: 250px;
+    width: 250px;
+    margin-right: 2em;
+  }
+
+  #color {
+    cursor: pointer;
+  }
+
+  div.box {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 3em;
+
+  }
+
+  .index {
+    border: 1px solid black;
+    border-radius: 5px;
+    color: black;
+    background-color: rgba(0, 204, 255, 1);
+    padding: 2em;
+  }
+
+  .index:hover {
+    background-color: rgb(43, 213, 255);
+  }
+</style>
+<script>
+
+  function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
+  if (getCookie("user-color") == "")
+    document.cookie = "user-color=#d34ea5"
+</script>
+
+<body>
+
+  <h1>Cookie</h1>
+
+
+  <div id="square" class="square"></div>
+
+  <br>
+  <br>
+  <input type="color" id="color" name="color"
+    onchange="document.getElementById('square').style.backgroundColor = this.value; document.cookie = 'user-color=' + this.value">
+  <label for="head">Edit color</label>
+  <br>
+  <hr>
+  <div class="box">
+    <a href="index.html" class="index">Index</a>
+  </div>
+
+</body>
+<script>
+  document.getElementById("color").value = getCookie("user-color");
+  document.getElementById("square").style.backgroundColor = getCookie("user-color");
+
+</script>
+
+</html>

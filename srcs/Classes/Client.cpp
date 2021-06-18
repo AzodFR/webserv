@@ -1,23 +1,21 @@
 #include "Client.hpp"
 
-
 Client::Client()
 {
-	
 }
 
 Client::Client(int id, int socket)
 {
-    _id = id;
-    _socket = socket;
+	_id = id;
+	_socket = socket;
 }
 
-Client::Client(const Client & ref)
+Client::Client(const Client &ref)
 {
-    (void)ref;
+	(void)ref;
 }
 
-Client &Client::operator=(const Client & ref)
+Client &Client::operator=(const Client &ref)
 {
 	_id = ref._id;
 	_content = ref._content;

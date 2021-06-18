@@ -4,9 +4,9 @@
 
 string trim_whitespace(string s)
 {
-	 s.erase(s.find_last_not_of("\t\n\v\f\r ") + 1);
-	 s.erase(0, s.find_first_not_of("\t\n\v\f\r "));
-	 return s;
+	s.erase(s.find_last_not_of("\t\n\v\f\r ") + 1);
+	s.erase(0, s.find_first_not_of("\t\n\v\f\r "));
+	return s;
 }
 
 string get_key(string line)
@@ -53,7 +53,7 @@ bool is_not_whitespace(string line)
 
 bool is_all_digit(string line)
 {
-for (string::iterator it = line.begin(); it != line.end(); it++)
+	for (string::iterator it = line.begin(); it != line.end(); it++)
 	{
 		if (isdigit(*it))
 			continue;
@@ -67,7 +67,6 @@ for (string::iterator it = line.begin(); it != line.end(); it++)
 
 void Parser::finishLoc(t_loc *parent, t_loc *child)
 {
-//cout << "Im \e[92m" << child->path << "\e[0m and my parent is \e[93m" << parent->path << "\e[0m" << endl;
 	if (!child->options.methods.size())
 		child->options.methods = parent->options.methods;
 
@@ -88,21 +87,17 @@ void Parser::finishLoc(t_loc *parent, t_loc *child)
 	else
 		path = child->options.params.find("root")->second;
 
-
 	if (path[path.size() - 1] == '/')
-			path = path.substr(0, path.size() - 1);
+		path = path.substr(0, path.size() - 1);
 
 	if (!child->options.params.count("root"))
 		child->options.params.insert(make_pair("root", parent_root + "/" + path + "/"));
 	else
 		child->options.params.find("root")->second = parent_root + "/" + path + "/";
 
-
 	for (list<t_loc *>::iterator it = child->childs.begin(); it != child->childs.end(); it++)
 		finishLoc(child, (*it));
 }
-
-
 
 void Parser::addToLoc(map<string, string> loc, vector<string> meth, string path, t_loc *root, string dir, int n)
 {
@@ -114,8 +109,14 @@ void Parser::addToLoc(map<string, string> loc, vector<string> meth, string path,
 	size_t pos = 0;
 
 	string token;
+	if (path == "/")
+	{
+		for (map<string, string>::iterator it = loc.begin(); it != loc.end(); it++)
+			root->options.params.insert(*it);
+	}
+
 	if (path.size() > 1 && path[path.size() - 1] == '/')
-			path = path.substr(0, path.size() - 1);
+		path = path.substr(0, path.size() - 1);
 	while ((pos = path.find("/")) != string::npos)
 	{
 		if (path[0] == '/')
@@ -125,19 +126,19 @@ void Parser::addToLoc(map<string, string> loc, vector<string> meth, string path,
 		}
 
 		token = path.substr(0, pos);
-		if(token.size())
+		if (token.size())
 		{
 			//cout << token << endl;
 			parent = child;
-				for (list<t_loc *>::iterator it = child->childs.begin(); it != child->childs.end(); it++)
+			for (list<t_loc *>::iterator it = child->childs.begin(); it != child->childs.end(); it++)
+			{
+				if ((*it)->path == token)
 				{
-					if ((*it)->path == token)
-					{
-						//cout << "\e[92mfound: " << token << " in -> " << parent->path << "\e[0m" <<endl;
-						child = *it;
-						break;
-					}
+					//cout << "\e[92mfound: " << token << " in -> " << parent->path << "\e[0m" <<endl;
+					child = *it;
+					break;
 				}
+			}
 			if (child == parent)
 			{
 				//cout << "\e[91mnot found: " << token << " in -> " << parent->path << "\e[0m" << endl;
@@ -153,14 +154,14 @@ void Parser::addToLoc(map<string, string> loc, vector<string> meth, string path,
 	//cout << path << endl;
 	if (path.size())
 	{
-	parent = child;
+		parent = child;
 		if (child->childs.size())
 		{
 			for (list<t_loc *>::iterator it = child->childs.begin(); it != child->childs.end(); it++)
 			{
 				if ((*it)->path == path)
 				{
-					if (child->options.methods.size())
+					if (child->options.params.size())
 					{
 						cout << "\e[91m[\e[1;39m" << save << "\e[91m] duplicate location \e[1;91m" << dir << ":" << n << "\e[0m" << endl;
 						exit(1);
@@ -190,10 +191,9 @@ void Parser::addToLoc(map<string, string> loc, vector<string> meth, string path,
 
 // PARSING INDEPENDANT ================================================================================
 
-
 // Get the allowed method IN location: x
 
-vector<string>Parser::parseMethod(map<string, string> args, string loc, string path, int n)
+vector<string> Parser::parseMethod(map<string, string> args, string loc, string path, int n)
 {
 	vector<string> methods;
 
@@ -246,11 +246,7 @@ vector<string>Parser::parseMethod(map<string, string> args, string loc, string p
 	if (!(tmp == "GET"))
 		methods.push_back(tmp);
 	tmp.clear();
-	(void) loc;
-for(vector<string>::iterator it = methods.begin(); it != methods.end(); it++)
-{
-	cout << "For location: " << path << " allow: " << *it << endl;
-}
+	(void)loc;
 	return methods;
 }
 
@@ -261,7 +257,6 @@ vector<string> Parser::parseMethod(string parsed, string path, int n)
 	vector<string> methods;
 
 	methods.push_back("GET");
-cout << parsed << endl;
 	string list[] = {"GET", "HEAD", "POST", "PUT", "DELETE"};
 
 	string tmp;
@@ -282,11 +277,7 @@ cout << parsed << endl;
 				if (tmp == list[i])
 					break;
 			}
-			if (!(tmp == "GET"))
-			{
-				methods.push_back(tmp);
-				cout << methods.size() << " - |" << tmp << "|" << endl;
-			}
+			methods.push_back(tmp);
 			tmp.clear();
 		}
 		else
@@ -303,11 +294,7 @@ cout << parsed << endl;
 		if (tmp == list[i])
 			break;
 	}
-	if (!(tmp == "GET"))
-	{
-				methods.push_back(tmp);
-				cout << methods.size() << " - |" << tmp << "|" << endl;
-			}
+	methods.push_back(tmp);
 	tmp.clear();
 	return methods;
 }
@@ -374,7 +361,6 @@ pair<string, map<string, vector<string> > > Parser::parseExtension(int fd, int *
 					elem.push_back(get_val(line));
 					params.insert(make_pair(get_key(line), elem));
 				}
-				//DEBUG cout << "\e[97mlocation params registered: " << line << "\e[0m" << endl;
 				line.clear();
 			}
 		}
@@ -384,7 +370,6 @@ pair<string, map<string, vector<string> > > Parser::parseExtension(int fd, int *
 		cout << "\e[91mmissing '\e[1;91m}\e[0;91m' in \e[1;91m" << path << ":" << n << "\e[0m" << endl;
 		exit(1);
 	}
-cout << "Extension " << ext << " parsed !" << endl;
 	return make_pair(ext, params);
 }
 
@@ -442,13 +427,12 @@ map<string, string> Parser::parseLocation(int fd, int *numb, string path, string
 			}
 			else
 			{
-				if (get_key(line) == "maxBody" && (atoi(get_val(line).c_str()) < 0  || !is_all_digit(get_val(line))))
+				if (get_key(line) == "maxBody" && (atoi(get_val(line).c_str()) < 0 || !is_all_digit(get_val(line))))
 				{
 					cout << "\e[91minvalid maxBody size in \e[1;91m" << path << ":" << n << "\e[0m" << endl;
 					exit(1);
 				}
 				params.insert(make_pair(get_key(line), get_val(line)));
-				//DEBUG cout << "\e[97mlocation params registered: " << line << "\e[0m" << endl;
 				line.clear();
 			}
 		}
@@ -537,22 +521,20 @@ map<int, string> parseErrorPages(int fd, int *numb, map<int, string> default_pag
 	return default_pages;
 }
 
-
 // Tree of locations
 void printLoc(t_loc *root, int level)
 {
 	t_loc *tmp = root;
 	int i = 0;
-	for(list<t_loc *>::iterator it = tmp->childs.begin(); it != tmp->childs.end(); it++)
+	for (list<t_loc *>::iterator it = tmp->childs.begin(); it != tmp->childs.end(); it++)
 	{
 		i = 0;
-		while(i++ < level)
+		while (i++ < level)
 			cout << "  ";
-		cout << "\e[" << to_string(92 + level) << "mL-> " << (*it)->path  << "\e[0m (root: " << (*it)->options.params.find("root")->second << ")" << endl;
+		cout << "\e[" << to_string(92 + level) << "mL-> " << (*it)->path << "\e[0m (root: " << (*it)->options.params.find("root")->second << ")" << endl;
 		printLoc(*it, level + 1);
 	}
 }
-
 
 void Parser::setWorkers(string line)
 {
@@ -581,7 +563,7 @@ void Parser::parsePort(vector<int> *ports, string line, string path, int n)
 	int port;
 	while ((pos = line.find(",")) != string::npos)
 	{
-		
+
 		split = trim_whitespace(line.substr(0, pos));
 		if (!is_all_digit(split) || !(port = atoi(split.c_str())))
 		{
@@ -600,12 +582,10 @@ void Parser::parsePort(vector<int> *ports, string line, string path, int n)
 	ports->push_back(port);
 }
 
-
 //TODO if port exist, default_server > other
 
 void Parser::parseServer(int fd, string line, string path, int *numb)
 {
-	//map<string, map<string, string> Parser;
 	bool start = false;
 	bool in = false;
 
@@ -616,6 +596,7 @@ void Parser::parseServer(int fd, string line, string path, int *numb)
 	vector<int> ports;
 	t_loc *loc = new t_loc();
 	loc->path = "/";
+	loc->options.methods.push_back("GET");
 	loc->parent = NULL;
 
 	string name = "default_server";
@@ -628,7 +609,6 @@ void Parser::parseServer(int fd, string line, string path, int *numb)
 	map<string, vector<string> > methods;
 	vector<string> allowed;
 	map<string, map<string, vector<string> > > extension;
-
 
 	string possible[] = {"listen", "server_name", "root", "error_pages", "location", "index", "allow_methods", "extension", "auto_index"};
 
@@ -675,7 +655,7 @@ void Parser::parseServer(int fd, string line, string path, int *numb)
 					line.clear();
 					continue;
 				}
-				for (int i = 0; i < 10 /*replace by 4 */; i++)
+				for (int i = 0; i < 10; i++)
 				{
 					if (i == 9)
 					{
@@ -712,9 +692,7 @@ void Parser::parseServer(int fd, string line, string path, int *numb)
 							i = 9;
 							break;
 						case 6:
-							cout << "for / " << endl;
 							allowed = parseMethod(get_val(line), path, n);
-							cout << "sortie" << endl;
 							i = 9;
 							break;
 						case 7:
@@ -739,7 +717,6 @@ void Parser::parseServer(int fd, string line, string path, int *numb)
 					}
 				}
 			}
-			//DEBUG	cout << "\e[94mdata server registered: " << line << "\e[0m" <<endl;
 			line.clear();
 		}
 	}
@@ -749,21 +726,15 @@ void Parser::parseServer(int fd, string line, string path, int *numb)
 		exit(1);
 	}
 	if (!allowed.size())
-	{
 		allowed.push_back("GET");
-		//allowed.push_back("HEAD");
-	}
-	if (loc->options.methods.size() < 2)
-	{
-		loc->options.methods = allowed;
-		for (vector<string>::iterator it = allowed.begin(); it != allowed.end(); it++)
-			cout << "/ -> " << *it << endl;
-	}
 	if (!loc->options.params.count("root"))
 		loc->options.params.insert(make_pair("root", root));
 	for (list<t_loc *>::iterator it = loc->childs.begin(); it != loc->childs.end(); it++)
+	{
+		cout << "test" << endl;
 		finishLoc(loc, (*it));
-	
+	}
+
 	if (!loc->options.params.count("index"))
 		loc->options.params.insert(make_pair("index", index));
 
@@ -772,17 +743,20 @@ void Parser::parseServer(int fd, string line, string path, int *numb)
 
 	cout << "Server: \e[97;1m" << name << endl;
 	cout << "\e[0m\e[91mroot /\e[0m" << endl;
-		printLoc(loc, 0);
-	cout << endl << endl;
+	printLoc(loc, 0);
+	cout << endl
+		 << endl;
 
 	*numb = n;
 	if (!ports.size())
 		ports.push_back(DEFAULT_PORT);
-	
-	int id = _pre_Serv.size();
-	for (vector<int>::iterator it = ports.begin(); it != ports.end(); it ++)
+
+	int id = 0;
+	if (_pre_Serv.size())
+		id = (*_pre_Serv.rbegin()).id + 1;
+	for (vector<int>::iterator it = ports.begin(); it != ports.end(); it++)
 	{
-		_t_preServ preServ = {id, *it, name, error_pages,loc, extension, auto_index};
+		_t_preServ preServ = {id, *it, name, error_pages, loc, extension, auto_index};
 		_pre_Serv.push_back(preServ);
 	}
 }
@@ -825,7 +799,7 @@ Parser::Parser(string path)
 			n++;
 			if (!is_not_whitespace(line))
 				continue;
-			for (int i = 0; i < 2 ; i++)
+			for (int i = 0; i < 2; i++)
 			{
 				if (i == 3)
 				{
@@ -861,9 +835,7 @@ Parser::Parser(string path)
 
 Parser::~Parser()
 {
-
 }
-
 
 Parser &Parser::operator=(const Parser &other)
 {
